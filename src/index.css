@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #0f172a;
+  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.98) 34%, #f8fafc 100%),
+    #f8fafc;
+  font-family: 'Pretendard Variable', Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(168, 85, 247, 0.55);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-lg border border-line bg-surface shadow-card;
+  }
+
+  .section-title {
+    @apply text-sm font-semibold text-ink;
+  }
+
+  .label {
+    @apply text-xs font-semibold text-muted;
+  }
+
+  .field {
+    @apply h-11 w-full rounded-md border border-line bg-white px-3 text-sm text-ink transition placeholder:text-slate-400 focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10;
+  }
+
+  .primary-button {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand-gradient px-4 text-sm font-semibold text-white shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+
+  .secondary-button {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md border border-brand-purple/30 bg-white px-4 text-sm font-semibold text-brand-violet transition duration-200 hover:border-brand-purple hover:bg-brand-purple/5 disabled:cursor-not-allowed disabled:text-slate-400;
+  }
+
+  .icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-white text-muted transition hover:border-brand-blue/40 hover:bg-brand-blue/5 hover:text-brand-blue;
+  }
+
+  .brand-mark {
+    @apply inline-flex items-center gap-2.5 text-ink;
+  }
+
+  .brand-icon {
+    @apply flex h-9 w-9 items-center justify-center rounded-md border border-brand-purple/15 bg-white p-2 shadow-card;
+  }
+
+  .metric-tile {
+    @apply rounded-lg border border-line bg-white p-4 shadow-card;
+  }
+
+  .gradient-text {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+  }
+}
