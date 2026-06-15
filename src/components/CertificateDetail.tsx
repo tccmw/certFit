@@ -32,15 +32,15 @@ export function CertificateDetail({ item }: CertificateDetailProps) {
   const certificate = item.certificate
 
   return (
-    <section className="panel animate-soft-scale p-5 sm:p-6">
+    <section className="panel p-5 sm:p-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-bold text-brand-blue">{certificate.provider}</p>
           <h2 className="mt-1 text-xl font-bold text-ink">{certificate.name}</h2>
           <p className="mt-3 text-sm leading-6 text-muted">{certificate.description}</p>
         </div>
-        <div className="rounded-lg bg-brand-gradient p-4 text-white shadow-card xl:w-32">
-          <p className="text-xs font-bold text-white/75">합격 가능성</p>
+        <div className="rounded-lg border border-line bg-slate-50 p-4 text-ink xl:w-32">
+          <p className="text-xs font-bold text-muted">합격 가능성</p>
           <p className="mt-1 text-xl font-bold">{item.pass_probability}%</p>
         </div>
       </div>
@@ -79,7 +79,7 @@ export function CertificateDetail({ item }: CertificateDetailProps) {
                   <span>{value}</span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-brand-gradient" style={{ width: `${Math.min(100, (value / 45) * 100)}%` }} />
+                  <div className="h-full rounded-full bg-brand-purple" style={{ width: `${Math.min(100, (value / 45) * 100)}%` }} />
                 </div>
               </div>
             ))}
@@ -95,7 +95,7 @@ export function CertificateDetail({ item }: CertificateDetailProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {certificate.subjects.map((subject) => (
-              <span key={subject} className="rounded-md bg-brand-purple/10 px-2.5 py-1 text-xs font-bold text-brand-violet">
+              <span key={subject} className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-bold text-muted">
                 {subject}
               </span>
             ))}
@@ -117,7 +117,7 @@ export function CertificateDetail({ item }: CertificateDetailProps) {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {certificate.schedules.map((schedule) => (
-            <div key={schedule.id} className="rounded-md border border-line bg-white p-3 shadow-card">
+            <div key={schedule.id} className="rounded-md border border-line bg-white p-3">
               <p className="text-sm font-bold text-ink">{schedule.exam_name}</p>
               <p className="mt-1 text-xs leading-5 text-muted">
                 접수 {schedule.registration_start ?? '-'} ~ {schedule.registration_end ?? '-'}

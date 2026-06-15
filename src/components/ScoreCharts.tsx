@@ -12,7 +12,7 @@ interface ScoreChartsProps {
   className?: string
 }
 
-const chartColors = ['#A855F7', '#3B82F6', '#22C55E', '#F59E0B', '#38BDF8']
+const chartColors = ['#863BFF', '#47BFFF', '#6D28D9', '#16803A', '#B7791F']
 
 export function ScoreCharts({ recommendations, roadmap, compact = false, className = '' }: ScoreChartsProps) {
   const topItems = recommendations.slice(0, 5)
@@ -26,7 +26,7 @@ export function ScoreCharts({ recommendations, roadmap, compact = false, classNa
         <p className="mt-1 text-sm text-muted">추천 점수와 저장된 로드맵 진행률을 비교합니다.</p>
       </div>
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className={`${compact ? 'h-40' : 'h-72'} rounded-lg border border-line bg-white p-3 shadow-card`}>
+        <div className={`${compact ? 'h-40' : 'h-72'} rounded-lg border border-line bg-white p-3`}>
           {topItems.length > 0 ? (
             <Bar
               data={{
@@ -54,7 +54,7 @@ export function ScoreCharts({ recommendations, roadmap, compact = false, classNa
             <EmptyChart label="추천 계산 후 그래프가 표시됩니다." />
           )}
         </div>
-        <div className={`${compact ? 'h-40' : 'h-72'} rounded-lg border border-line bg-white p-3 shadow-card`}>
+        <div className={`${compact ? 'h-40' : 'h-72'} rounded-lg border border-line bg-white p-3`}>
           {roadmap ? (
             <Doughnut
               data={{
@@ -62,8 +62,8 @@ export function ScoreCharts({ recommendations, roadmap, compact = false, classNa
                 datasets: [
                   {
                     data: [checked, remaining],
-                    backgroundColor: ['#A855F7', '#E2E8F0'],
-                    hoverBackgroundColor: ['#3B82F6', '#CBD5E1'],
+                    backgroundColor: ['#863BFF', '#E3DAF7'],
+                    hoverBackgroundColor: ['#6D28D9', '#D8C9F8'],
                     borderWidth: 0,
                   },
                 ],

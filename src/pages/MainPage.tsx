@@ -141,7 +141,7 @@ export function MainPage() {
             {message}
           </span>
           {savedRoadmap && (
-            <Link className="inline-flex items-center gap-1 text-brand-violet hover:text-brand-blue hover:underline" to="/mypage">
+            <Link className="inline-flex items-center gap-1 text-ink hover:text-brand-blue hover:underline" to="/mypage">
               마이페이지에서 보기
               <ArrowRight size={14} />
             </Link>
@@ -237,7 +237,7 @@ function LineStepper({ currentStep }: { currentStep: MainStep }) {
               <div className="flex min-w-0 flex-1 flex-col items-center">
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-                    complete ? 'bg-success text-white' : active ? 'bg-brand-gradient text-white' : 'bg-slate-100 text-muted'
+                    complete ? 'bg-success text-white' : active ? 'bg-brand-purple text-white' : 'bg-slate-100 text-muted'
                   }`}
                 >
                   {complete ? <CheckCircle2 size={17} /> : index + 1}
