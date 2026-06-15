@@ -19,9 +19,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.98) 34%, #f8fafc 100%),
-    #f8fafc;
+  background: #f7f5fc;
   font-family: 'Pretendard Variable', Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
@@ -36,7 +34,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid rgba(168, 85, 247, 0.55);
+  outline: 2px solid rgba(134, 59, 255, 0.45);
   outline-offset: 2px;
 }
 
@@ -54,19 +52,19 @@ textarea:focus-visible {
   }
 
   .field {
-    @apply h-11 w-full rounded-md border border-line bg-white px-3 text-sm text-ink transition placeholder:text-slate-400 focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10;
+    @apply h-11 w-full rounded-md border border-line bg-white px-3 text-sm text-ink transition placeholder:text-slate-400 focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10;
   }
 
   .primary-button {
-    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand-gradient px-4 text-sm font-semibold text-white shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0;
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand-purple px-4 text-sm font-semibold text-white shadow-card transition duration-150 hover:bg-brand-violet disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .secondary-button {
-    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md border border-brand-purple/30 bg-white px-4 text-sm font-semibold text-brand-violet transition duration-200 hover:border-brand-purple hover:bg-brand-purple/5 disabled:cursor-not-allowed disabled:text-slate-400;
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition duration-150 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400;
   }
 
   .icon-button {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-white text-muted transition hover:border-brand-blue/40 hover:bg-brand-blue/5 hover:text-brand-blue;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-white text-muted transition hover:border-slate-400 hover:bg-slate-50 hover:text-ink;
   }
 
   .brand-mark {
@@ -74,7 +72,7 @@ textarea:focus-visible {
   }
 
   .brand-icon {
-    @apply flex h-9 w-9 items-center justify-center rounded-md border border-brand-purple/15 bg-white p-2 shadow-card;
+    @apply flex h-9 w-9 items-center justify-center rounded-md border border-brand-purple/20 bg-white p-2 shadow-card;
   }
 
   .metric-tile {

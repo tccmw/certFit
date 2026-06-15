@@ -28,7 +28,7 @@ export function RecommendationList({
     <section className={`panel flex min-h-0 flex-col p-5 ${className}`}>
       <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-bold text-brand-blue">
+          <span className="inline-flex items-center gap-2 rounded-md border border-line bg-slate-50 px-3 py-1 text-xs font-bold text-muted">
             <Route size={14} />
             적합도
           </span>
@@ -66,15 +66,15 @@ export function RecommendationList({
               key={item.id}
               className={`rounded-lg border transition duration-200 ${
                 dense ? 'p-3' : 'p-4'
-              } ${selected ? 'border-brand-purple bg-brand-gradient-soft shadow-card' : 'border-line bg-white shadow-card hover:border-brand-purple/35'}`}
+              } ${selected ? 'border-brand-purple bg-brand-purple/5 shadow-card' : 'border-line bg-white shadow-card hover:border-brand-purple/40'}`}
             >
               <button type="button" className="block w-full text-left" onClick={() => onSelect(item)}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-md bg-ink px-2.5 py-1 text-xs font-bold text-white">TOP {index + 1}</span>
-                      <span className="rounded-md bg-brand-purple/10 px-2.5 py-1 text-xs font-bold text-brand-violet">
-                        {item.score}% Match
+                      <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-bold text-muted">
+                        {item.score}% 적합
                       </span>
                     </div>
                     <h3 className={`${dense ? 'mt-2 text-base' : 'mt-3 text-lg'} font-bold text-ink`}>{item.certificate.name}</h3>
@@ -86,9 +86,9 @@ export function RecommendationList({
                     </p>
                   </div>
 
-                  <div className={`shrink-0 rounded-lg bg-white text-center shadow-card ${dense ? 'w-20 p-2.5' : 'w-28 p-4'}`}>
+                  <div className={`shrink-0 rounded-lg border border-line bg-white text-center ${dense ? 'w-20 p-2.5' : 'w-28 p-4'}`}>
                     <p className="text-xs font-bold text-muted">적합도</p>
-                    <p className="mt-1 text-xl font-bold text-brand-violet">{item.score}</p>
+                    <p className="mt-1 text-xl font-bold text-ink">{item.score}</p>
                   </div>
                 </div>
 
@@ -130,10 +130,10 @@ function StatChip({
   tone: 'success' | 'blue' | 'warning' | 'purple'
 }) {
   const toneClass = {
-    success: 'bg-success/10 text-emerald-700',
-    blue: 'bg-brand-blue/10 text-brand-blue',
-    warning: 'bg-warning/10 text-amber-700',
-    purple: 'bg-brand-purple/10 text-brand-violet',
+    success: 'border border-line bg-white text-emerald-700',
+    blue: 'border border-line bg-white text-brand-blue',
+    warning: 'border border-line bg-white text-amber-700',
+    purple: 'border border-line bg-white text-muted',
   }[tone]
 
   return (

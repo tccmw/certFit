@@ -24,19 +24,19 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
   }
 
   return (
-    <section className="panel animate-fade-up p-5 sm:p-6">
+    <section className="panel p-5 sm:p-6">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand-purple/10 px-3 py-1 text-xs font-bold text-brand-violet">
+          <span className="inline-flex items-center gap-2 rounded-md border border-line bg-slate-50 px-3 py-1 text-xs font-bold text-muted">
             <Target size={14} />
             진단 조건
           </span>
           <h2 className="mt-3 text-xl font-bold text-ink">자격증 진단</h2>
           <p className="mt-1 text-sm leading-6 text-muted">목표와 학습 조건을 기준으로 추천 점수와 예상 로드맵을 계산합니다.</p>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-xs font-bold text-emerald-700">
+        <span className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-xs font-bold text-muted">
           <Target size={14} />
-          실시간 추천 v1
+          추천 기준 v1
         </span>
       </div>
 
@@ -150,7 +150,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function CheckTile({ checked, label, onChange }: { checked: boolean; label: string; onChange: (checked: boolean) => void }) {
   return (
-    <label className="flex min-h-14 items-center gap-3 rounded-md border border-line bg-slate-50/70 p-3 transition hover:border-brand-purple/40 hover:bg-brand-purple/5">
+    <label className="flex min-h-14 items-center gap-3 rounded-md border border-line bg-slate-50 p-3 transition hover:border-slate-400 hover:bg-white">
       <input type="checkbox" className="h-4 w-4 accent-brand-purple" checked={checked} onChange={(event) => onChange(event.target.checked)} />
       <span className="text-sm font-semibold text-slate-700">{label}</span>
     </label>

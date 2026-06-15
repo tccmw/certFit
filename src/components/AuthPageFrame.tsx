@@ -12,14 +12,13 @@ interface AuthPageFrameProps {
 export function AuthPageFrame({ title, subtitle, children }: AuthPageFrameProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 text-ink">
-      <section className="grid w-full max-w-5xl overflow-hidden rounded-xl border border-line bg-white shadow-soft lg:grid-cols-[1fr_420px]">
-        <div className="relative hidden min-h-[500px] bg-slate-50 p-10 text-ink lg:block">
-          <div className="absolute inset-x-0 top-0 h-1 bg-brand-gradient" />
+      <section className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-line bg-white shadow-soft lg:grid-cols-[1fr_420px]">
+        <div className="relative hidden min-h-[500px] border-r border-line bg-slate-50 p-10 text-ink lg:block">
           <div className="relative flex h-full flex-col justify-between">
             <div>
               <BrandLogo subtitle="자격증 플래너" />
               <div className="mt-20 max-w-md">
-                <span className="inline-flex items-center gap-2 rounded-full bg-brand-purple/10 px-3 py-1 text-xs font-semibold text-brand-violet">
+                <span className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-muted">
                   <Route size={14} />
                   경로 설정
                 </span>
@@ -34,7 +33,7 @@ export function AuthPageFrame({ title, subtitle, children }: AuthPageFrameProps)
 
             <div className="grid grid-cols-3 gap-3">
               {['직무 적합도', '준비 기간', '학습 계획'].map((label) => (
-                <div key={label} className="rounded-md border border-line bg-white p-3 text-xs font-semibold text-muted shadow-card">
+                <div key={label} className="rounded-md border border-line bg-white p-3 text-xs font-semibold text-muted">
                   {label}
                 </div>
               ))}
