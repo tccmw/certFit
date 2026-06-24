@@ -46,6 +46,14 @@ class ExamScheduleOut(BaseModel):
     note: str
 
 
+class LearningResourceOut(BaseModel):
+    name: str
+    provider_type: str
+    delivery: str
+    fit: str
+    note: str
+
+
 class CertificateOut(BaseModel):
     id: int
     slug: str
@@ -64,6 +72,17 @@ class CertificateOut(BaseModel):
     subjects: list[str]
     tags: list[str]
     schedules: list[ExamScheduleOut] = []
+    learning_resources: list[LearningResourceOut] = []
+
+
+class UserCertificateCreate(BaseModel):
+    certificate_id: int
+
+
+class UserCertificateOut(BaseModel):
+    id: int
+    certificate: CertificateOut
+    acquired_at: date | None
 
 
 class RecommendationItemOut(BaseModel):

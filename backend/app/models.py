@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -80,6 +80,19 @@ class ExamSchedule(Base):
     note: Mapped[str] = mapped_column(Text, default="")
 
     certificate: Mapped[Certificate] = relationship(back_populates="schedules")
+
+
+class UserCertificate(Base):
+    __tablename__ = "user_certificates"
+    __table_args__ = (UniqueConstraint("user_id", "certificate_id", name="uq_user_certificate"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    certificate_id: Mapped[int] = mapped_column(ForeignKey("certificates.id"))
+    acquired_at: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    certificate: Mapped[Certificate] = relationship()
 
 
 class RecommendationRun(Base):

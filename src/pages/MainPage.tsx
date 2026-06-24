@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Route } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Route } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { api } from '../api/client'
@@ -18,6 +18,7 @@ const steps: Array<{ id: MainStep; label: string }> = [
   { id: 'results', label: '추천 결과' },
   { id: 'detail', label: '상세 정보' },
 ]
+const recommendationLoadingMinimumMs = 2000
 
 function parseStep(value: string | null): MainStep | null {
   return value === 'diagnosis' || value === 'results' || value === 'detail' ? value : null
@@ -74,10 +75,17 @@ export function MainPage() {
       return
     }
 
+    const loadingStartedAt = Date.now()
     setLoadingRecommendations(true)
     setMessage(null)
     try {
       const run = await api.recommendations(token, profile)
+      const remainingLoadingTime = recommendationLoadingMinimumMs - (Date.now() - loadingStartedAt)
+
+      if (remainingLoadingTime > 0) {
+        await new Promise<void>((resolve) => window.setTimeout(resolve, remainingLoadingTime))
+      }
+
       setRecommendationRun(run)
       setSelectedItem(null)
       setSavedRoadmap(null)
@@ -118,7 +126,8 @@ export function MainPage() {
   }
 
   return (
-    <main className="mx-auto max-w-[1120px] space-y-5">
+    <main className="mx-auto max-w-[1120px] space-y-5" aria-busy={loadingRecommendations}>
+      {loadingRecommendations && <RecommendationLoadingOverlay />}
       <section className="panel p-4 sm:p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -222,31 +231,54 @@ export function MainPage() {
   )
 }
 
+function RecommendationLoadingOverlay() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 px-4 backdrop-blur-sm" role="status" aria-live="polite">
+      <div className="w-full max-w-sm rounded-xl border border-line bg-white p-6 text-center shadow-soft sm:p-8">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
+          <LoaderCircle size={30} className="animate-spin" aria-hidden="true" />
+        </div>
+        <h2 className="mt-5 break-keep text-lg font-bold text-ink">
+          맞춤 자격증을
+          <br />
+          분석하고 있어요
+        </h2>
+        <p className="mt-2 break-keep text-sm leading-6 text-muted">
+          <span className="block">입력한 진단 조건을 바탕으로</span>
+          <span className="block">추천 결과와 학습 경로를 계산하고 있습니다.</span>
+        </p>
+        <p className="mt-4 text-xs font-semibold text-brand-violet">잠시만 기다려 주세요</p>
+      </div>
+    </div>
+  )
+}
+
 function LineStepper({ currentStep }: { currentStep: MainStep }) {
   const currentIndex = steps.findIndex((item) => item.id === currentStep)
 
   return (
     <div className="mt-5">
-      <div className="flex items-start">
+      <div className="grid grid-cols-3">
         {steps.map((item, index) => {
           const active = index === currentIndex
           const complete = index < currentIndex
 
           return (
-            <div key={item.id} className="flex flex-1 items-start">
-              <div className="flex min-w-0 flex-1 flex-col items-center">
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-                    complete ? 'bg-success text-white' : active ? 'bg-brand-purple text-white' : 'bg-slate-100 text-muted'
-                  }`}
-                >
-                  {complete ? <CheckCircle2 size={17} /> : index + 1}
-                </span>
-                <span className={`mt-2 text-center text-xs font-bold ${active ? 'text-ink' : 'text-muted'}`}>{item.label}</span>
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`mt-4 h-0.5 flex-1 ${index < currentIndex ? 'bg-success' : 'bg-line'}`} />
+            <div key={item.id} className="relative flex min-w-0 flex-col items-center">
+              {index > 0 && (
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute right-1/2 top-4 z-0 h-0.5 w-full ${index <= currentIndex ? 'bg-success' : 'bg-line'}`}
+                />
               )}
+              <span
+                className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                  complete ? 'bg-success text-white' : active ? 'bg-brand-purple text-white' : 'bg-slate-100 text-muted'
+                }`}
+              >
+                {complete ? <CheckCircle2 size={17} /> : index + 1}
+              </span>
+              <span className={`mt-2 text-center text-xs font-bold ${active ? 'text-ink' : 'text-muted'}`}>{item.label}</span>
             </div>
           )
         })}

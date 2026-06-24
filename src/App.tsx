@@ -4,6 +4,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { useAuth } from './auth/useAuth'
 import { BrandLogo } from './components/BrandLogo'
 import { AppShell } from './layout/AppShell'
+import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { MainPage } from './pages/MainPage'
 import { MyPage } from './pages/MyPage'
@@ -20,7 +21,8 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            <Route path="/main" element={<MainPage />} />
+            <Route path="/main" element={<DashboardPage />} />
+            <Route path="/diagnosis" element={<MainPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
         </Route>

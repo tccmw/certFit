@@ -34,6 +34,14 @@ export interface ExamSchedule {
   note: string
 }
 
+export interface LearningResource {
+  name: string
+  provider_type: string
+  delivery: string
+  fit: string
+  note: string
+}
+
 export interface Certificate {
   id: number
   slug: string
@@ -52,6 +60,13 @@ export interface Certificate {
   subjects: string[]
   tags: string[]
   schedules: ExamSchedule[]
+  learning_resources?: LearningResource[]
+}
+
+export interface UserCertificate {
+  id: number
+  certificate: Certificate
+  acquired_at: string | null
 }
 
 export interface RecommendationItem {

@@ -48,6 +48,19 @@ def test_register_recommend_and_create_roadmap_flow():
         )
         assert recommendations.status_code == 200
         item = recommendations.json()["items"][0]
+        assert item["certificate"]["learning_resources"]
+        assert {"name", "provider_type", "delivery", "fit", "note"} <= set(item["certificate"]["learning_resources"][0])
+
+        owned = client.post("/my-certificates", headers=headers, json={"certificate_id": item["certificate"]["id"]})
+        assert owned.status_code == 201
+        assert owned.json()["certificate"]["id"] == item["certificate"]["id"]
+
+        listed = client.get("/my-certificates", headers=headers)
+        assert listed.status_code == 200
+        assert len(listed.json()) == 1
+
+        removed = client.delete(f"/my-certificates/{owned.json()['id']}", headers=headers)
+        assert removed.status_code == 204
 
         roadmap = client.post("/roadmaps", headers=headers, json={"certificate_id": item["certificate"]["id"]})
         assert roadmap.status_code == 200

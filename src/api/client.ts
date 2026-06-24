@@ -6,6 +6,7 @@ import type {
   RecommendationRun,
   Roadmap,
   User,
+  UserCertificate,
 } from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
@@ -69,6 +70,18 @@ export const api = {
       body: profile,
     }),
   certificates: () => request<Certificate[]>('/certificates'),
+  myCertificates: (token: string) => request<UserCertificate[]>('/my-certificates', { token }),
+  addMyCertificate: (token: string, certificateId: number) =>
+    request<UserCertificate>('/my-certificates', {
+      method: 'POST',
+      token,
+      body: { certificate_id: certificateId },
+    }),
+  removeMyCertificate: (token: string, userCertificateId: number) =>
+    request<void>(`/my-certificates/${userCertificateId}`, {
+      method: 'DELETE',
+      token,
+    }),
   recommendations: (token: string, profile: ProfileInput) =>
     request<RecommendationRun>('/recommendations', {
       method: 'POST',

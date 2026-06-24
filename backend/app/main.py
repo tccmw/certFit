@@ -5,18 +5,32 @@ import os
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, selectinload
 
 from .database import Base, SessionLocal, engine, get_db
-from .models import Certificate, RecommendationItem, RecommendationRun, Roadmap, RoadmapStep, User, UserEvent, UserProfile
+from .models import Certificate, RecommendationItem, RecommendationRun, Roadmap, RoadmapStep, User, UserCertificate, UserEvent, UserProfile
 from .recommender import recommend
 from .roadmaps import generate_roadmap_steps
-from .schemas import AuthIn, AuthOut, CertificateOut, EventIn, ImportOut, ProfileIn, RecommendationRunOut, RoadmapCreate, RoadmapOut, StepPatch, UserOut
+from .schemas import (
+    AuthIn,
+    AuthOut,
+    CertificateOut,
+    EventIn,
+    ImportOut,
+    ProfileIn,
+    RecommendationRunOut,
+    RoadmapCreate,
+    RoadmapOut,
+    StepPatch,
+    UserCertificateCreate,
+    UserCertificateOut,
+    UserOut,
+)
 from .security import hash_password, make_token, verify_password
 from .seed import seed_database
-from .serializers import certificate_out, recommendation_run_out, roadmap_out, user_out
+from .serializers import certificate_out, recommendation_run_out, roadmap_out, user_certificate_out, user_out
 
 
 @asynccontextmanager
@@ -134,6 +148,55 @@ def get_certificate(certificate_id: int, db: Session = Depends(get_db)) -> Certi
     if not certificate:
         raise HTTPException(status_code=404, detail="자격증을 찾을 수 없습니다.")
     return certificate_out(certificate)
+
+
+@app.get("/my-certificates", response_model=list[UserCertificateOut])
+def list_user_certificates(user: User = Depends(current_user), db: Session = Depends(get_db)) -> list[UserCertificateOut]:
+    user_certificates = (
+        db.query(UserCertificate)
+        .options(selectinload(UserCertificate.certificate).selectinload(Certificate.schedules))
+        .filter(UserCertificate.user_id == user.id)
+        .order_by(UserCertificate.created_at.desc())
+        .all()
+    )
+    return [user_certificate_out(user_certificate) for user_certificate in user_certificates]
+
+
+@app.post("/my-certificates", response_model=UserCertificateOut, status_code=status.HTTP_201_CREATED)
+def add_user_certificate(
+    payload: UserCertificateCreate,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> UserCertificateOut:
+    certificate = db.query(Certificate).options(selectinload(Certificate.schedules)).filter(Certificate.id == payload.certificate_id).first()
+    if not certificate:
+        raise HTTPException(status_code=404, detail="자격증을 찾을 수 없습니다.")
+    if db.query(UserCertificate).filter(UserCertificate.user_id == user.id, UserCertificate.certificate_id == certificate.id).first():
+        raise HTTPException(status_code=409, detail="이미 보유 자격증에 추가되어 있습니다.")
+
+    user_certificate = UserCertificate(user_id=user.id, certificate_id=certificate.id)
+    db.add(user_certificate)
+    db.add(UserEvent(user_id=user.id, certificate_id=certificate.id, event_type="certificate_add", metadata_json=json.dumps({"tags": [certificate.category]}, ensure_ascii=False)))
+    db.commit()
+    db.refresh(user_certificate)
+    return user_certificate_out(user_certificate)
+
+
+@app.delete("/my-certificates/{user_certificate_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+def remove_user_certificate(user_certificate_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Response:
+    user_certificate = (
+        db.query(UserCertificate)
+        .filter(UserCertificate.id == user_certificate_id, UserCertificate.user_id == user.id)
+        .first()
+    )
+    if not user_certificate:
+        raise HTTPException(status_code=404, detail="보유 자격증을 찾을 수 없습니다.")
+
+    certificate_id = user_certificate.certificate_id
+    db.delete(user_certificate)
+    db.add(UserEvent(user_id=user.id, certificate_id=certificate_id, event_type="certificate_remove"))
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.post("/recommendations", response_model=RecommendationRunOut)
