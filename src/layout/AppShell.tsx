@@ -13,7 +13,10 @@ export function AppShell() {
 
         <nav className="flex flex-wrap items-center gap-2">
           <NavLink to="/main" className={({ isActive }) => navClass(isActive)}>
-            메인
+            홈
+          </NavLink>
+          <NavLink to="/diagnosis" className={({ isActive }) => navClass(isActive)}>
+            자격증 진단
           </NavLink>
           <NavLink to="/mypage" className={({ isActive }) => navClass(isActive)}>
             마이페이지

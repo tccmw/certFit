@@ -2,8 +2,20 @@ from __future__ import annotations
 
 import json
 
-from .models import Certificate, RecommendationItem, RecommendationRun, Roadmap, User, UserProfile
-from .schemas import CertificateOut, ExamScheduleOut, ProfileIn, RecommendationItemOut, RecommendationRunOut, RoadmapOut, RoadmapStepOut, UserOut
+from .learning_resources import LEARNING_RESOURCES
+from .models import Certificate, RecommendationItem, RecommendationRun, Roadmap, User, UserCertificate, UserProfile
+from .schemas import (
+    CertificateOut,
+    ExamScheduleOut,
+    LearningResourceOut,
+    ProfileIn,
+    RecommendationItemOut,
+    RecommendationRunOut,
+    RoadmapOut,
+    RoadmapStepOut,
+    UserCertificateOut,
+    UserOut,
+)
 
 
 def json_list(value: str) -> list[str]:
@@ -64,6 +76,18 @@ def certificate_out(certificate: Certificate) -> CertificateOut:
             )
             for schedule in certificate.schedules
         ],
+        learning_resources=[
+            LearningResourceOut(**resource)
+            for resource in LEARNING_RESOURCES.get(certificate.slug, [])
+        ],
+    )
+
+
+def user_certificate_out(user_certificate: UserCertificate) -> UserCertificateOut:
+    return UserCertificateOut(
+        id=user_certificate.id,
+        certificate=certificate_out(user_certificate.certificate),
+        acquired_at=user_certificate.acquired_at,
     )
 
 
