@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -6,57 +7,53 @@ import { api } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { RoadmapPanel } from '../components/RoadmapPanel'
 import { ScoreCharts } from '../components/ScoreCharts'
-import type { RecommendationRun, Roadmap, RoadmapStep } from '../types'
+import { queryKeys } from '../lib/query-client'
+import type { Roadmap, RoadmapStep } from '../types'
 
 export function MyPage() {
   const { logout, token } = useAuth()
   const navigate = useNavigate()
-  const [history, setHistory] = useState<RecommendationRun[]>([])
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
+  const queryClient = useQueryClient()
   const [activeRoadmapId, setActiveRoadmapId] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+
+  const historyQuery = useQuery({
+    queryKey: queryKeys.recommendationHistory,
+    queryFn: () => api.recommendationHistory(token!),
+    enabled: Boolean(token),
+  })
+  const roadmapsQuery = useQuery({
+    queryKey: queryKeys.roadmaps,
+    queryFn: () => api.roadmaps(token!),
+    enabled: Boolean(token),
+  })
+
+  const history = historyQuery.data ?? []
+  const roadmaps = roadmapsQuery.data ?? []
+  const queryError = historyQuery.error ?? roadmapsQuery.error
 
   const activeRoadmap = useMemo(
     () => roadmaps.find((roadmap) => roadmap.id === activeRoadmapId) ?? null,
     [activeRoadmapId, roadmaps],
   )
 
-  useEffect(() => {
-    if (!token) {
-      return
-    }
-
-    let active = true
-    Promise.all([api.recommendationHistory(token), api.roadmaps(token)])
-      .then(([runs, savedRoadmaps]) => {
-        if (!active) {
-          return
-        }
-        setHistory(runs)
-        setRoadmaps(savedRoadmaps)
-        setActiveRoadmapId((previous) => (savedRoadmaps.some((roadmap) => roadmap.id === previous) ? previous : null))
-      })
-      .catch((error: unknown) => {
-        if (active) {
-          setMessage(error instanceof Error ? error.message : '마이페이지 데이터를 불러오지 못했습니다.')
-        }
-      })
-
-    return () => {
-      active = false
-    }
-  }, [token])
+  const updateStepMutation = useMutation({
+    mutationFn: ({ roadmap, step }: { roadmap: Roadmap; step: RoadmapStep }) =>
+      api.updateStep(token!, roadmap.id, step.id, !step.checked),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<Roadmap[]>(queryKeys.roadmaps, (previous = []) =>
+        previous.map((roadmap) => (roadmap.id === updated.id ? updated : roadmap)),
+      )
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : '진행률 업데이트 중 오류가 발생했습니다.'),
+  })
 
   async function toggleStep(roadmap: Roadmap, step: RoadmapStep) {
     if (!token) {
       return
     }
-    try {
-      const updated = await api.updateStep(token, roadmap.id, step.id, !step.checked)
-      setRoadmaps((previous) => previous.map((item) => (item.id === updated.id ? updated : item)))
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '진행률 업데이트 중 오류가 발생했습니다.')
-    }
+    setMessage(null)
+    updateStepMutation.mutate({ roadmap, step })
   }
 
   function handleLogout() {
@@ -72,7 +69,11 @@ export function MyPage() {
 
   return (
     <main className="mx-auto max-w-[1440px] space-y-6">
-      {message && <p className="rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-card">{message}</p>}
+      {(message || queryError) && (
+        <p className="rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-card">
+          {message ?? (queryError instanceof Error ? queryError.message : '마이페이지 데이터를 불러오지 못했습니다.')}
+        </p>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[420px_minmax(0,1fr)]">
         <section className="space-y-5">

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Route } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 
@@ -9,7 +10,8 @@ import { ProfileForm } from '../components/ProfileForm'
 import { RecommendationList } from '../components/RecommendationList'
 import { ScoreCharts } from '../components/ScoreCharts'
 import { defaultProfile } from '../data/options'
-import type { Certificate, ProfileInput, RecommendationItem, RecommendationRun, Roadmap } from '../types'
+import { queryKeys } from '../lib/query-client'
+import type { ProfileInput, RecommendationItem, RecommendationRun, Roadmap } from '../types'
 
 type MainStep = 'diagnosis' | 'results' | 'detail'
 
@@ -26,21 +28,57 @@ function parseStep(value: string | null): MainStep | null {
 
 export function MainPage() {
   const { token, refreshUser } = useAuth()
+  const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
   const [profile, setProfile] = useState<ProfileInput>(defaultProfile)
-  const [certificates, setCertificates] = useState<Certificate[]>([])
   const [recommendationRun, setRecommendationRun] = useState<RecommendationRun | null>(null)
   const [selectedItem, setSelectedItem] = useState<RecommendationItem | null>(null)
   const [savedRoadmap, setSavedRoadmap] = useState<Roadmap | null>(null)
-  const [loadingRecommendations, setLoadingRecommendations] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    api
-      .certificates()
-      .then(setCertificates)
-      .catch((error) => setMessage(error instanceof Error ? error.message : '자격증 데이터를 불러오지 못했습니다.'))
-  }, [])
+  const certificatesQuery = useQuery({
+    queryKey: queryKeys.certificates,
+    queryFn: api.certificates,
+    staleTime: 30 * 60_000,
+  })
+
+  const recommendationMutation = useMutation({
+    mutationFn: async (input: ProfileInput) => {
+      const loadingStartedAt = Date.now()
+      const run = await api.recommendations(token!, input)
+      const remainingLoadingTime = recommendationLoadingMinimumMs - (Date.now() - loadingStartedAt)
+      if (remainingLoadingTime > 0) {
+        await new Promise<void>((resolve) => window.setTimeout(resolve, remainingLoadingTime))
+      }
+      await api.saveProfile(token!, input)
+      await refreshUser()
+      return run
+    },
+    onSuccess: async (run) => {
+      setRecommendationRun(run)
+      setSelectedItem(null)
+      setSavedRoadmap(null)
+      moveStep('results')
+      await queryClient.invalidateQueries({ queryKey: queryKeys.recommendationHistory })
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : '추천 계산 중 오류가 발생했습니다.'),
+  })
+
+  const createRoadmapMutation = useMutation({
+    mutationFn: async (item: RecommendationItem) => ({
+      item,
+      roadmap: await api.createRoadmap(token!, item.certificate.id, profile.available_weeks),
+    }),
+    onSuccess: async ({ item, roadmap }) => {
+      setSavedRoadmap(roadmap)
+      setMessage(`${item.certificate.name} 로드맵을 저장했습니다.`)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.roadmaps })
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : '로드맵 저장 중 오류가 발생했습니다.'),
+  })
+
+  const certificates = certificatesQuery.data ?? []
+  const loadingRecommendations = recommendationMutation.isPending
 
   const recommendationItems = recommendationRun?.items ?? []
   const requestedStep = parseStep(searchParams.get('step'))
@@ -75,28 +113,8 @@ export function MainPage() {
       return
     }
 
-    const loadingStartedAt = Date.now()
-    setLoadingRecommendations(true)
     setMessage(null)
-    try {
-      const run = await api.recommendations(token, profile)
-      const remainingLoadingTime = recommendationLoadingMinimumMs - (Date.now() - loadingStartedAt)
-
-      if (remainingLoadingTime > 0) {
-        await new Promise<void>((resolve) => window.setTimeout(resolve, remainingLoadingTime))
-      }
-
-      setRecommendationRun(run)
-      setSelectedItem(null)
-      setSavedRoadmap(null)
-      moveStep('results')
-      await api.saveProfile(token, profile)
-      await refreshUser()
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '추천 계산 중 오류가 발생했습니다.')
-    } finally {
-      setLoadingRecommendations(false)
-    }
+    recommendationMutation.mutate(profile)
   }
 
   async function selectRecommendation(item: RecommendationItem) {
@@ -109,13 +127,8 @@ export function MainPage() {
     if (!token) {
       return
     }
-    try {
-      const roadmap = await api.createRoadmap(token, item.certificate.id, profile.available_weeks)
-      setSavedRoadmap(roadmap)
-      setMessage(`${item.certificate.name} 로드맵을 저장했습니다.`)
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '로드맵 저장 중 오류가 발생했습니다.')
-    }
+    setMessage(null)
+    createRoadmapMutation.mutate(item)
   }
 
   function goToResults() {
@@ -143,11 +156,11 @@ export function MainPage() {
         <LineStepper currentStep={step} />
       </section>
 
-      {message && (
+      {(message || certificatesQuery.error) && (
         <div className="flex flex-col gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-semibold text-amber-800 sm:flex-row sm:items-center sm:justify-between">
           <span className="inline-flex items-center gap-2">
             <AlertCircle size={17} />
-            {message}
+            {message ?? (certificatesQuery.error instanceof Error ? certificatesQuery.error.message : '자격증 데이터를 불러오지 못했습니다.')}
           </span>
           {savedRoadmap && (
             <Link className="inline-flex items-center gap-1 text-ink hover:text-brand-blue hover:underline" to="/mypage">
