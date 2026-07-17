@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 
 import { useAuth } from '../auth/useAuth'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
 import { AuthPageFrame } from '../components/AuthPageFrame'
 
 export function LoginPage() {
@@ -33,12 +35,12 @@ export function LoginPage() {
       <form className="space-y-4" onSubmit={submit}>
         <label className="block">
           <span className="label">이메일</span>
-          <input className="field mt-1" type="email" value={email} required onChange={(event) => setEmail(event.target.value)} />
+          <Input className="mt-1" type="email" value={email} required onChange={(event) => setEmail(event.target.value)} />
         </label>
         <label className="block">
           <span className="label">비밀번호</span>
-          <input
-            className="field mt-1"
+          <Input
+            className="mt-1"
             type="password"
             minLength={6}
             required
@@ -47,10 +49,10 @@ export function LoginPage() {
           />
         </label>
         {error && <p className="rounded-md bg-warning/10 px-3 py-2 text-sm font-medium text-amber-800">{error}</p>}
-        <button type="submit" className="primary-button w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading}>
           <LogIn size={16} />
           {loading ? '로그인 중' : '로그인'}
-        </button>
+        </Button>
       </form>
       <p className="mt-5 text-center text-sm text-muted">
         계정이 없다면{' '}

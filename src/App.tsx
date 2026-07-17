@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { useAuth } from './auth/useAuth'
 import { BrandLogo } from './components/BrandLogo'
+import { Card } from './components/ui/card'
 import { AppShell } from './layout/AppShell'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
@@ -65,10 +66,10 @@ function ProtectedRoute() {
 function BootScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
-      <div className="panel flex items-center gap-4 px-6 py-5">
+      <Card className="flex items-center gap-4 px-6 py-5">
         <BrandLogo size="sm" />
         <span className="text-sm font-semibold text-muted">세션을 확인하는 중입니다.</span>
-      </div>
+      </Card>
     </div>
   )
 }

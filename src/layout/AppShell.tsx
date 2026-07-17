@@ -2,6 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 
 import { useAuth } from '../auth/useAuth'
 import { BrandLogo } from '../components/BrandLogo'
+import { buttonVariants } from '../components/ui/button'
+import { cn } from '../lib/utils'
 
 export function AppShell() {
   const { user } = useAuth()
@@ -33,9 +35,8 @@ export function AppShell() {
 }
 
 function navClass(isActive: boolean) {
-  return `inline-flex h-10 items-center rounded-md px-4 text-sm font-semibold transition ${
-    isActive
-      ? 'bg-brand-purple text-white shadow-card'
-      : 'border border-transparent text-muted hover:border-line hover:bg-slate-50 hover:text-ink'
-  }`
+  return cn(
+    buttonVariants({ variant: isActive ? 'default' : 'ghost' }),
+    !isActive && 'border border-transparent hover:border-border',
+  )
 }
