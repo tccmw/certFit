@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { RoadmapPanel } from '../components/RoadmapPanel'
+import { RecommendationHistoryTable } from '../components/RecommendationHistoryTable'
 import { ScoreCharts } from '../components/ScoreCharts'
 import { queryKeys } from '../lib/query-client'
 import type { Roadmap, RoadmapStep } from '../types'
@@ -79,20 +80,7 @@ export function MyPage() {
         <section className="space-y-5">
           <section className="panel p-5">
             <h3 className="section-title">최근 추천 기록</h3>
-            <div className="mt-3 space-y-2">
-              {history.slice(0, 6).map((run) => (
-                <div key={run.id} className="rounded-md border border-line bg-white px-3 py-2">
-                  <p className="text-sm font-bold text-ink">{new Date(run.created_at).toLocaleString('ko-KR')}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted">
-                    {run.profile_snapshot.target_field} / {run.profile_snapshot.interested_role} / 상위{' '}
-                    {run.items[0]?.certificate.name ?? '-'}
-                  </p>
-                </div>
-              ))}
-              {history.length === 0 && (
-                <p className="rounded-md border border-dashed border-line bg-slate-50 p-4 text-sm text-muted">추천 기록이 없습니다.</p>
-              )}
-            </div>
+            <RecommendationHistoryTable data={history} />
           </section>
 
           <section className="panel p-5">
