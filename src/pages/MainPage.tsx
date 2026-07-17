@@ -97,24 +97,14 @@ export function MainPage() {
     setSearchParams(nextStep === 'diagnosis' ? {} : { step: nextStep }, options)
   }
 
-  async function runRecommendations() {
+  function runRecommendations(input: ProfileInput) {
     if (!token) {
-      return
-    }
-    if (
-      !profile.target_field ||
-      !profile.current_status ||
-      !profile.interested_role ||
-      !profile.knowledge_level ||
-      profile.available_weeks <= 0 ||
-      profile.weekly_hours <= 0
-    ) {
-      setMessage('추천에 필요한 진단 조건을 모두 입력해주세요.')
       return
     }
 
     setMessage(null)
-    recommendationMutation.mutate(profile)
+    setProfile(input)
+    recommendationMutation.mutate(input)
   }
 
   async function selectRecommendation(item: RecommendationItem) {
@@ -177,7 +167,6 @@ export function MainPage() {
             profile={profile}
             disabled={false}
             loading={loadingRecommendations}
-            onChange={setProfile}
             onSubmit={runRecommendations}
           />
 
