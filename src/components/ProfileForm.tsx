@@ -4,6 +4,9 @@ import { RefreshCw, Search, Target } from 'lucide-react'
 
 import { currentStatuses, interestedRoles, knowledgeLevels, targetFields } from '../data/options'
 import type { ProfileInput } from '../types'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { NativeSelect } from './ui/native-select'
 
 interface ProfileFormProps {
   profile: ProfileInput
@@ -42,31 +45,30 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
 
       <form className="grid gap-4 md:grid-cols-2" onSubmit={submit}>
         <Field label="목표 분야">
-          <select className="field mt-1" value={profile.target_field} onChange={(event) => update('target_field', event.target.value)}>
+          <NativeSelect className="mt-1" value={profile.target_field} onChange={(event) => update('target_field', event.target.value)}>
             <option value="" disabled>
               선택하세요
             </option>
             {targetFields.map((field) => (
               <option key={field}>{field}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
 
         <Field label="현재 상태">
-          <select className="field mt-1" value={profile.current_status} onChange={(event) => update('current_status', event.target.value)}>
+          <NativeSelect className="mt-1" value={profile.current_status} onChange={(event) => update('current_status', event.target.value)}>
             <option value="" disabled>
               선택하세요
             </option>
             {currentStatuses.map((status) => (
               <option key={status}>{status}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
 
         <Field label="준비 가능 기간">
           <div className="mt-1 flex items-center gap-2">
-            <input
-              className="field"
+            <Input
               type="number"
               min={1}
               max={52}
@@ -79,8 +81,7 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
 
         <Field label="주당 학습 시간">
           <div className="mt-1 flex items-center gap-2">
-            <input
-              className="field"
+            <Input
               type="number"
               min={0}
               max={80}
@@ -92,19 +93,19 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
         </Field>
 
         <Field label="관심 직무">
-          <select className="field mt-1" value={profile.interested_role} onChange={(event) => update('interested_role', event.target.value)}>
+          <NativeSelect className="mt-1" value={profile.interested_role} onChange={(event) => update('interested_role', event.target.value)}>
             <option value="" disabled>
               선택하세요
             </option>
             {interestedRoles.map((role) => (
               <option key={role}>{role}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
 
         <Field label="기초 지식 수준">
-          <select
-            className="field mt-1"
+          <NativeSelect
+            className="mt-1"
             value={profile.knowledge_level}
             onChange={(event) => update('knowledge_level', event.target.value as ProfileInput['knowledge_level'])}
           >
@@ -116,7 +117,7 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
                 {level.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
 
         <CheckTile
@@ -130,10 +131,10 @@ export function ProfileForm({ profile, disabled, loading, onChange, onSubmit }: 
           onChange={(checked) => update('has_work_experience', checked)}
         />
 
-        <button type="submit" className="primary-button md:col-span-2" disabled={disabled || loading}>
+        <Button type="submit" className="md:col-span-2" disabled={disabled || loading}>
           {loading ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />}
           {loading ? '추천 생성 중' : '추천 시작하기'}
-        </button>
+        </Button>
       </form>
     </section>
   )

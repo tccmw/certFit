@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 
 import { useAuth } from '../auth/useAuth'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
 import { AuthPageFrame } from '../components/AuthPageFrame'
 
 export function RegisterPage() {
@@ -34,16 +36,16 @@ export function RegisterPage() {
       <form className="space-y-4" onSubmit={submit}>
         <label className="block">
           <span className="label">이름</span>
-          <input className="field mt-1" value={name} required onChange={(event) => setName(event.target.value)} />
+          <Input className="mt-1" value={name} required onChange={(event) => setName(event.target.value)} />
         </label>
         <label className="block">
           <span className="label">이메일</span>
-          <input className="field mt-1" type="email" value={email} required onChange={(event) => setEmail(event.target.value)} />
+          <Input className="mt-1" type="email" value={email} required onChange={(event) => setEmail(event.target.value)} />
         </label>
         <label className="block">
           <span className="label">비밀번호</span>
-          <input
-            className="field mt-1"
+          <Input
+            className="mt-1"
             type="password"
             minLength={6}
             required
@@ -52,10 +54,10 @@ export function RegisterPage() {
           />
         </label>
         {error && <p className="rounded-md bg-warning/10 px-3 py-2 text-sm font-medium text-amber-800">{error}</p>}
-        <button type="submit" className="primary-button w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading}>
           <UserPlus size={16} />
           {loading ? '가입 중' : '회원가입'}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-5 text-center text-sm text-muted">
