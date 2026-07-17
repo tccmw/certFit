@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, Award, BookOpenCheck, CalendarDays, Clock3, Plus, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { api } from '../api/client'
 import { useAuth } from '../auth/useAuth'
-import type { Certificate, ExamSchedule, Roadmap, UserCertificate } from '../types'
+import { queryKeys } from '../lib/query-client'
+import type { Certificate, ExamSchedule } from '../types'
 
 interface UpcomingExam {
   certificate: Certificate
@@ -13,44 +15,48 @@ interface UpcomingExam {
 
 export function DashboardPage() {
   const { token, user } = useAuth()
-  const [certificates, setCertificates] = useState<Certificate[]>([])
-  const [ownedCertificates, setOwnedCertificates] = useState<UserCertificate[]>([])
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
+  const queryClient = useQueryClient()
   const [selectedCertificateId, setSelectedCertificateId] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!token) {
-      return
-    }
+  const certificatesQuery = useQuery({
+    queryKey: queryKeys.certificates,
+    queryFn: api.certificates,
+    staleTime: 30 * 60_000,
+  })
+  const ownedCertificatesQuery = useQuery({
+    queryKey: queryKeys.myCertificates,
+    queryFn: () => api.myCertificates(token!),
+    enabled: Boolean(token),
+  })
+  const roadmapsQuery = useQuery({
+    queryKey: queryKeys.roadmaps,
+    queryFn: () => api.roadmaps(token!),
+    enabled: Boolean(token),
+  })
 
-    let active = true
-    Promise.all([api.certificates(), api.myCertificates(token), api.roadmaps(token)])
-      .then(([catalog, owned, savedRoadmaps]) => {
-        if (!active) {
-          return
-        }
-        setCertificates(catalog)
-        setOwnedCertificates(owned)
-        setRoadmaps(savedRoadmaps)
-      })
-      .catch((error: unknown) => {
-        if (active) {
-          setMessage(error instanceof Error ? error.message : '홈 데이터를 불러오지 못했습니다.')
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false)
-        }
-      })
+  const certificates = certificatesQuery.data ?? []
+  const ownedCertificates = ownedCertificatesQuery.data ?? []
+  const roadmaps = roadmapsQuery.data ?? []
+  const loading = certificatesQuery.isPending || ownedCertificatesQuery.isPending || roadmapsQuery.isPending
+  const queryError = certificatesQuery.error ?? ownedCertificatesQuery.error ?? roadmapsQuery.error
 
-    return () => {
-      active = false
-    }
-  }, [token])
+  const addCertificateMutation = useMutation({
+    mutationFn: (certificateId: number) => api.addMyCertificate(token!, certificateId),
+    onSuccess: async () => {
+      setSelectedCertificateId('')
+      await queryClient.invalidateQueries({ queryKey: queryKeys.myCertificates })
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : '자격증을 추가하지 못했습니다.'),
+  })
+
+  const removeCertificateMutation = useMutation({
+    mutationFn: (userCertificateId: number) => api.removeMyCertificate(token!, userCertificateId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.myCertificates })
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : '자격증을 삭제하지 못했습니다.'),
+  })
 
   const availableCertificates = useMemo(() => {
     const ownedIds = new Set(ownedCertificates.map((item) => item.certificate.id))
@@ -66,17 +72,8 @@ export function DashboardPage() {
       return
     }
 
-    setSaving(true)
     setMessage(null)
-    try {
-      const added = await api.addMyCertificate(token, certificateId)
-      setOwnedCertificates((previous) => [added, ...previous])
-      setSelectedCertificateId('')
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '자격증을 추가하지 못했습니다.')
-    } finally {
-      setSaving(false)
-    }
+    addCertificateMutation.mutate(certificateId)
   }
 
   async function removeCertificate(userCertificateId: number) {
@@ -85,12 +82,7 @@ export function DashboardPage() {
     }
 
     setMessage(null)
-    try {
-      await api.removeMyCertificate(token, userCertificateId)
-      setOwnedCertificates((previous) => previous.filter((item) => item.id !== userCertificateId))
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '자격증을 삭제하지 못했습니다.')
-    }
+    removeCertificateMutation.mutate(userCertificateId)
   }
 
   return (
@@ -107,7 +99,11 @@ export function DashboardPage() {
         </Link>
       </header>
 
-      {message && <p className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-semibold text-amber-800">{message}</p>}
+      {(message || queryError) && (
+        <p className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-semibold text-amber-800">
+          {message ?? (queryError instanceof Error ? queryError.message : '홈 데이터를 불러오지 못했습니다.')}
+        </p>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
         <section className="panel p-5 sm:p-6">
@@ -163,7 +159,7 @@ export function DashboardPage() {
               <select
                 className="field mt-1"
                 value={selectedCertificateId}
-                disabled={saving || availableCertificates.length === 0}
+                disabled={addCertificateMutation.isPending || availableCertificates.length === 0}
                 onChange={(event) => setSelectedCertificateId(event.target.value)}
               >
                 <option value="">자격증 선택</option>
@@ -174,7 +170,7 @@ export function DashboardPage() {
                 ))}
               </select>
             </label>
-            <button type="button" className="secondary-button" disabled={!selectedCertificateId || saving} onClick={addCertificate}>
+            <button type="button" className="secondary-button" disabled={!selectedCertificateId || addCertificateMutation.isPending} onClick={addCertificate}>
               <Plus size={16} />
               추가
             </button>

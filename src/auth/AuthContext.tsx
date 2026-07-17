@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { api } from '../api/client'
+import { queryClient } from '../lib/query-client'
 import type { AuthResponse, User } from '../types'
 import { AuthContext } from './authState'
 import type { AuthContextValue } from './authState'
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY)
+    queryClient.clear()
     setToken(null)
     setUser(null)
   }, [])
